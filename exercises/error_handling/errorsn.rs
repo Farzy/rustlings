@@ -17,19 +17,18 @@
 //
 // Execute `rustlings hint errorsn` for hints :)
 
-// I AM NOT DONE
 
-use std::error;
+use std::error::Error;
 use std::fmt;
 use std::io;
 
 // PositiveNonzeroInteger is a struct defined below the tests.
-fn read_and_validate(b: &mut dyn io::BufRead) -> Result<PositiveNonzeroInteger, ???> {
+fn read_and_validate(b: &mut dyn io::BufRead) -> Result<PositiveNonzeroInteger, Box<dyn Error>> {
     let mut line = String::new();
-    b.read_line(&mut line);
-    let num: i64 = line.trim().parse();
-    let answer = PositiveNonzeroInteger::new(num);
-    answer
+    b.read_line(&mut line)?;
+    let num: i64 = line.trim().parse()?;
+    let answer = PositiveNonzeroInteger::new(num)?;
+    Ok(answer)
 }
 
 //
@@ -37,7 +36,7 @@ fn read_and_validate(b: &mut dyn io::BufRead) -> Result<PositiveNonzeroInteger, 
 //
 
 // This is a test helper function that turns a &str into a BufReader.
-fn test_with_str(s: &str) -> Result<PositiveNonzeroInteger, Box<dyn error::Error>> {
+fn test_with_str(s: &str) -> Result<PositiveNonzeroInteger, Box<dyn Error>> {
     let mut b = io::BufReader::new(s.as_bytes());
     read_and_validate(&mut b)
 }
@@ -114,4 +113,4 @@ impl fmt::Display for CreationError {
     }
 }
 
-impl error::Error for CreationError {}
+impl Error for CreationError {}

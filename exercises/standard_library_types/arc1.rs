@@ -4,17 +4,19 @@
 // somewhere. Try not to create any copies of the `numbers` Vec!
 // Execute `rustlings hint arc1` for hints :)
 
-// I AM NOT DONE
 
-use std::sync::Arc;
+use std::sync::{Arc,Mutex};
 use std::thread;
 
 fn main() {
     let numbers: Vec<_> = (0..100u32).collect();
-    let shared_numbers = // TODO
+    let shared_numbers = Arc::new(numbers);
     let mut joinhandles = Vec::new();
+    let sumsums = Arc::new(Mutex::new(0)); // Does not need "mut"!
 
     for offset in 0..8 {
+        let child_numbers = Arc::clone(&shared_numbers);
+        let child_sumsums = Arc::clone(&sumsums);
         joinhandles.push(thread::spawn(move || {
             let mut i = offset;
             let mut sum = 0;
@@ -23,9 +25,12 @@ fn main() {
                 i += 5;
             }
             println!("Sum of offset {} is {}", offset, sum);
+            let mut ss = child_sumsums.lock().unwrap();
+            *ss += sum;
         }));
     }
     for handle in joinhandles.into_iter() {
         handle.join().unwrap();
     }
+    println!("The sum of sums is: {}", *sumsums.lock().unwrap());
 }

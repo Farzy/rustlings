@@ -35,6 +35,37 @@ impl Default for Person {
 // Otherwise, then return an instantiated Person object with the results
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
+        if s.len() == 0 {
+            Person::default()
+        } else {
+            let mut sp = s.split(",");
+            let name = sp.next().unwrap().to_string();
+            let age_str = sp.next().unwrap();
+            if let Ok(age) = age_str.parse() {
+                Person { name, age }
+            } else {
+                Person::default()
+            }
+        }
+    }
+}
+use std::str::FromStr;
+use std::fmt::Error;
+impl FromStr for Person {
+    type Err = Error;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.len() == 0 {
+            Err(Error)
+        } else {
+            let mut sp = s.split(",");
+            let name = sp.next().unwrap().to_string();
+            let age_str = sp.next().unwrap();
+            if let Ok(age) = age_str.parse() {
+                Ok(Person { name, age })
+            } else {
+                Err(Error)
+            }
+        }
     }
 }
 
@@ -43,8 +74,10 @@ fn main() {
     let p1 = Person::from("Mark,20");
     // Since From is implemented for Person, we should be able to use Into
     let p2: Person = "Gerald,70".into();
+    let p3: Person = "Tom,42".parse().unwrap();
     println!("{:?}", p1);
     println!("{:?}", p2);
+    println!("{:?}", p3);
 }
 
 #[cfg(test)]
@@ -70,6 +103,27 @@ mod tests {
         let p = Person::from("Mark,20");
         assert_eq!(p.name, "Mark");
         assert_eq!(p.age, 20);
+    }
+    #[test]
+    fn test_good_convert2() {
+        // Test that "Mark,20" works
+        let p = Person::from(",20");
+        assert_eq!(p.name, "");
+        assert_eq!(p.age, 20);
+    }
+    #[test]
+    fn test_good_parse() {
+        // Test that "Mark,20" works
+        let pr: Result<Person, Error> = "Mark,20".parse();
+        assert!(pr.is_ok());
+        let p = pr.unwrap();
+        assert_eq!(p.name, "Mark");
+        assert_eq!(p.age, 20);
+    }
+    fn test_bad_parse() {
+        // Test that "Mark,twenty" fails
+        let pr: Result<Person, Error> = "Mark,20".parse();
+        assert!(pr.is_err());
     }
     #[test]
     fn test_bad_age() {
