@@ -41,7 +41,7 @@ impl From<&str> for Person {
             let mut sp = s.split(",");
             let name = sp.next().unwrap().to_string();
             let age_str = sp.next().unwrap();
-            if let Ok(age) = age_str.parse() {
+            if let Ok(age) = age_str.parse::<usize>() {
                 Person { name, age }
             } else {
                 Person::default()
