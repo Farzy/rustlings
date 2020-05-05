@@ -34,18 +34,19 @@ impl Default for Person {
 // Otherwise, then return an instantiated Person object with the results
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
-        if s.len() == 0 {
-            Person::default()
-        } else {
-            let mut sp = s.split(",");
-            let name = sp.next().unwrap().to_string();
-            let age_str = sp.next().unwrap();
-            if let Ok(age) = age_str.parse::<usize>() {
-                Person { name, age }
-            } else {
-                Person::default()
+        let mut sp = s.split(",");
+        if let Some(name_str) = sp.next() {
+            if name_str.len() == 0 {
+                return Person::default();
+            }
+            let name = name_str.to_string();
+            if let Some(age_str) = sp.next() {
+                if let Ok(age) = age_str.parse() {
+                    return Person { name, age };
+                }
             }
         }
+        Person::default()
     }
 }
 use std::str::FromStr;
@@ -53,18 +54,19 @@ use std::fmt::Error;
 impl FromStr for Person {
     type Err = Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s.len() == 0 {
-            Err(Error)
-        } else {
-            let mut sp = s.split(",");
-            let name = sp.next().unwrap().to_string();
-            let age_str = sp.next().unwrap();
-            if let Ok(age) = age_str.parse() {
-                Ok(Person { name, age })
-            } else {
-                Err(Error)
+        let mut sp = s.split(",");
+        if let Some(name_str) = sp.next() {
+            if name_str.len() == 0 {
+                return Err(Error);
+            }
+            let name = name_str.to_string();
+            if let Some(age_str) = sp.next() {
+                if let Ok(age) = age_str.parse() {
+                    return Ok(Person { name, age });
+                }
             }
         }
+        Err(Error)
     }
 }
 
@@ -101,13 +103,6 @@ mod tests {
         // Test that "Mark,20" works
         let p = Person::from("Mark,20");
         assert_eq!(p.name, "Mark");
-        assert_eq!(p.age, 20);
-    }
-    #[test]
-    fn test_good_convert2() {
-        // Test that "Mark,20" works
-        let p = Person::from(",20");
-        assert_eq!(p.name, "");
         assert_eq!(p.age, 20);
     }
     #[test]

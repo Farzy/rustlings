@@ -21,18 +21,19 @@ struct Person {
 impl FromStr for Person {
     type Err = String;
     fn from_str(s: &str) -> Result<Person, Self::Err> {
-        if s.len() == 0 {
-            Err(String::from("Cannot convert to Person"))
-        } else {
-            let mut sp = s.split(",");
-            let name = sp.next().unwrap().to_string();
-            let age_str = sp.next().unwrap();
-            if let Ok(age) = age_str.parse::<usize>() {
-                Ok(Person { name, age })
-            } else {
-                Err(String::from("Cannot convert to Person"))
+        let mut sp = s.split(",");
+        if let Some(name_str) = sp.next() {
+            if name_str.len() == 0 {
+                return Err(String::from("Cannot convert to Person"));
+            }
+            let name = name_str.to_string();
+            if let Some(age_str) = sp.next() {
+                if let Ok(age) = age_str.parse() {
+                    return Ok(Person { name, age });
+                }
             }
         }
+        Err(String::from("Cannot convert to Person"))
     }
 }
 
